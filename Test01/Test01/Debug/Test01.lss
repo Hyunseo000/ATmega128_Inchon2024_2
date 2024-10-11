@@ -3,27 +3,29 @@ Test01.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  000000f8  2**0
+  0 .data         00000000  00800100  00800100  000001ea  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         000000a4  00000000  00000000  00000054  2**1
+  1 .text         00000196  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  000000f8  2**0
+  2 .comment      00000030  00000000  00000000  000001ea  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000128  2**2
+  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  0000021c  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000020  00000000  00000000  00000168  2**0
+  4 .debug_aranges 00000030  00000000  00000000  0000025c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   000007fd  00000000  00000000  00000188  2**0
+  5 .debug_info   00000a42  00000000  00000000  0000028c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 00000761  00000000  00000000  00000985  2**0
+  6 .debug_abbrev 00000834  00000000  00000000  00000cce  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   000001a3  00000000  00000000  000010e6  2**0
+  7 .debug_line   00000346  00000000  00000000  00001502  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000024  00000000  00000000  0000128c  2**2
+  8 .debug_frame  00000044  00000000  00000000  00001848  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    000003ae  00000000  00000000  000012b0  2**0
+  9 .debug_str    0000041b  00000000  00000000  0000188c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_ranges 00000010  00000000  00000000  0000165e  2**0
+ 10 .debug_loc    00000208  00000000  00000000  00001ca7  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000020  00000000  00000000  00001eaf  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -107,23 +109,213 @@ Disassembly of section .text:
   92:	d0 e1       	ldi	r29, 0x10	; 16
   94:	de bf       	out	0x3e, r29	; 62
   96:	cd bf       	out	0x3d, r28	; 61
-  98:	02 d0       	rcall	.+4      	; 0x9e <main>
-  9a:	02 c0       	rjmp	.+4      	; 0xa0 <_exit>
+  98:	16 d0       	rcall	.+44     	; 0xc6 <main>
+  9a:	7b c0       	rjmp	.+246    	; 0x192 <_exit>
 
 0000009c <__bad_interrupt>:
   9c:	b1 cf       	rjmp	.-158    	; 0x0 <__vectors>
 
-0000009e <main>:
+0000009e <CheckG1>:
 
-#include <avr/io.h>
+// LED Port : PG4
 
+int CheckG1()
+{
+	char v = PING & 0x02; // G1 핀을 확인 (동작 모드 전환)
+  9e:	80 91 63 00 	lds	r24, 0x0063	; 0x800063 <__TEXT_REGION_LENGTH__+0x7e0063>
+	if (v == 0) return 1;
+  a2:	81 fd       	sbrc	r24, 1
+  a4:	03 c0       	rjmp	.+6      	; 0xac <CheckG1+0xe>
+  a6:	81 e0       	ldi	r24, 0x01	; 1
+  a8:	90 e0       	ldi	r25, 0x00	; 0
+  aa:	08 95       	ret
+	return 0;
+  ac:	80 e0       	ldi	r24, 0x00	; 0
+  ae:	90 e0       	ldi	r25, 0x00	; 0
+}
+  b0:	08 95       	ret
+
+000000b2 <CheckG2>:
+
+int CheckG2()
+{
+	char v = PING & 0x04; // G2 핀을 확인 (속도 변경)
+  b2:	80 91 63 00 	lds	r24, 0x0063	; 0x800063 <__TEXT_REGION_LENGTH__+0x7e0063>
+	if (v == 0) return 1;
+  b6:	82 fd       	sbrc	r24, 2
+  b8:	03 c0       	rjmp	.+6      	; 0xc0 <CheckG2+0xe>
+  ba:	81 e0       	ldi	r24, 0x01	; 1
+  bc:	90 e0       	ldi	r25, 0x00	; 0
+  be:	08 95       	ret
+	return 0;
+  c0:	80 e0       	ldi	r24, 0x00	; 0
+  c2:	90 e0       	ldi	r25, 0x00	; 0
+}
+  c4:	08 95       	ret
+
+000000c6 <main>:
 
 int main(void)
 {
-  9e:	ff cf       	rjmp	.-2      	; 0x9e <main>
+	DDRG |= 0x10;       // PG4 핀을 출력 모드로 설정 (LED 제어)
+  c6:	e4 e6       	ldi	r30, 0x64	; 100
+  c8:	f0 e0       	ldi	r31, 0x00	; 0
+  ca:	80 81       	ld	r24, Z
+  cc:	80 61       	ori	r24, 0x10	; 16
+  ce:	80 83       	st	Z, r24
+	DDRG &= ~(0x06);    // PG1, PG2 핀을 입력 모드로 설정 (스위치 입력)
+  d0:	80 81       	ld	r24, Z
+  d2:	89 7f       	andi	r24, 0xF9	; 249
+  d4:	80 83       	st	Z, r24
+	char fast_mode = 0; // 빠르게 점등할지 여부를 결정하는 변수
 
-000000a0 <_exit>:
-  a0:	f8 94       	cli
+	// 첫 번째 스위치 G1이 눌리기를 기다림
+	while (1)
+	{
+		if (CheckG1() == 1)
+  d6:	e3 df       	rcall	.-58     	; 0x9e <CheckG1>
+  d8:	01 97       	sbiw	r24, 0x01	; 1
+  da:	e9 f7       	brne	.-6      	; 0xd6 <main+0x10>
+  dc:	c0 e0       	ldi	r28, 0x00	; 0
+  de:	d1 e0       	ldi	r29, 0x01	; 1
 
-000000a2 <__stop_program>:
-  a2:	ff cf       	rjmp	.-2      	; 0xa2 <__stop_program>
+	// 메인 루프
+	while (1)
+	{
+		// 스위치 G1이 눌렸을 때 mode 값을 토글
+		if (CheckG1())
+  e0:	de df       	rcall	.-68     	; 0x9e <CheckG1>
+  e2:	89 2b       	or	r24, r25
+  e4:	71 f0       	breq	.+28     	; 0x102 <main+0x3c>
+  e6:	d1 11       	cpse	r29, r1
+		{
+			if (mode == 0)
+  e8:	02 c0       	rjmp	.+4      	; 0xee <main+0x28>
+  ea:	d1 e0       	ldi	r29, 0x01	; 1
+			mode = 1;
+  ec:	01 c0       	rjmp	.+2      	; 0xf0 <main+0x2a>
+  ee:	d0 e0       	ldi	r29, 0x00	; 0
+			else
+			mode = 0;
+  f0:	2f ef       	ldi	r18, 0xFF	; 255
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  f2:	83 ec       	ldi	r24, 0xC3	; 195
+  f4:	99 e0       	ldi	r25, 0x09	; 9
+  f6:	21 50       	subi	r18, 0x01	; 1
+  f8:	80 40       	sbci	r24, 0x00	; 0
+  fa:	90 40       	sbci	r25, 0x00	; 0
+  fc:	e1 f7       	brne	.-8      	; 0xf6 <main+0x30>
+  fe:	00 c0       	rjmp	.+0      	; 0x100 <main+0x3a>
+ 100:	00 00       	nop
+			_delay_ms(200); // 디바운싱 처리
+		}
+
+		// 스위치 G2가 눌렸을 때 fast_mode 값을 토글
+		if (CheckG2())
+ 102:	d7 df       	rcall	.-82     	; 0xb2 <CheckG2>
+ 104:	89 2b       	or	r24, r25
+ 106:	71 f0       	breq	.+28     	; 0x124 <main+0x5e>
+ 108:	c1 11       	cpse	r28, r1
+		{
+			if (fast_mode == 0)
+ 10a:	02 c0       	rjmp	.+4      	; 0x110 <main+0x4a>
+ 10c:	c1 e0       	ldi	r28, 0x01	; 1
+			fast_mode = 1;
+ 10e:	01 c0       	rjmp	.+2      	; 0x112 <main+0x4c>
+ 110:	c0 e0       	ldi	r28, 0x00	; 0
+			else
+			fast_mode = 0;
+ 112:	2f ef       	ldi	r18, 0xFF	; 255
+ 114:	83 ec       	ldi	r24, 0xC3	; 195
+ 116:	99 e0       	ldi	r25, 0x09	; 9
+ 118:	21 50       	subi	r18, 0x01	; 1
+ 11a:	80 40       	sbci	r24, 0x00	; 0
+ 11c:	90 40       	sbci	r25, 0x00	; 0
+ 11e:	e1 f7       	brne	.-8      	; 0x118 <main+0x52>
+ 120:	00 c0       	rjmp	.+0      	; 0x122 <main+0x5c>
+ 122:	00 00       	nop
+ 124:	d1 30       	cpi	r29, 0x01	; 1
+			_delay_ms(200); // 디바운싱 처리
+		}
+
+		// LED 상태 제어
+		if (mode == 1)
+ 126:	f9 f4       	brne	.+62     	; 0x166 <main+0xa0>
+ 128:	e5 e6       	ldi	r30, 0x65	; 101
+		{
+			PORTG |= 0x10; // PG4 핀을 HIGH로 설정 (LED 켜기)
+ 12a:	f0 e0       	ldi	r31, 0x00	; 0
+ 12c:	80 81       	ld	r24, Z
+ 12e:	80 61       	ori	r24, 0x10	; 16
+ 130:	80 83       	st	Z, r24
+ 132:	c1 30       	cpi	r28, 0x01	; 1
+
+			// fast_mode에 따라 점등 속도 변경
+			if (fast_mode == 1)
+ 134:	51 f4       	brne	.+20     	; 0x14a <main+0x84>
+ 136:	2f ef       	ldi	r18, 0xFF	; 255
+ 138:	83 ec       	ldi	r24, 0xC3	; 195
+ 13a:	99 e0       	ldi	r25, 0x09	; 9
+ 13c:	21 50       	subi	r18, 0x01	; 1
+ 13e:	80 40       	sbci	r24, 0x00	; 0
+ 140:	90 40       	sbci	r25, 0x00	; 0
+ 142:	e1 f7       	brne	.-8      	; 0x13c <main+0x76>
+ 144:	00 c0       	rjmp	.+0      	; 0x146 <main+0x80>
+ 146:	00 00       	nop
+ 148:	09 c0       	rjmp	.+18     	; 0x15c <main+0x96>
+ 14a:	2f ef       	ldi	r18, 0xFF	; 255
+ 14c:	83 ed       	ldi	r24, 0xD3	; 211
+ 14e:	90 e3       	ldi	r25, 0x30	; 48
+ 150:	21 50       	subi	r18, 0x01	; 1
+ 152:	80 40       	sbci	r24, 0x00	; 0
+ 154:	90 40       	sbci	r25, 0x00	; 0
+ 156:	e1 f7       	brne	.-8      	; 0x150 <main+0x8a>
+ 158:	00 c0       	rjmp	.+0      	; 0x15a <main+0x94>
+ 15a:	00 00       	nop
+ 15c:	e5 e6       	ldi	r30, 0x65	; 101
+			_delay_ms(200); // 빠르게 점등 (200ms)
+			else
+			_delay_ms(1000); // 기본 점등 속도 (1000ms)
+
+			PORTG &= ~(0x10); // PG4 핀을 LOW로 설정 (LED 끄기)
+ 15e:	f0 e0       	ldi	r31, 0x00	; 0
+ 160:	80 81       	ld	r24, Z
+ 162:	8f 7e       	andi	r24, 0xEF	; 239
+ 164:	80 83       	st	Z, r24
+ 166:	c1 30       	cpi	r28, 0x01	; 1
+		}
+
+		// fast_mode에 따른 꺼짐 속도 변경
+		if (fast_mode == 1)
+ 168:	51 f4       	brne	.+20     	; 0x17e <main+0xb8>
+ 16a:	2f ef       	ldi	r18, 0xFF	; 255
+ 16c:	81 ee       	ldi	r24, 0xE1	; 225
+ 16e:	94 e0       	ldi	r25, 0x04	; 4
+ 170:	21 50       	subi	r18, 0x01	; 1
+ 172:	80 40       	sbci	r24, 0x00	; 0
+ 174:	90 40       	sbci	r25, 0x00	; 0
+ 176:	e1 f7       	brne	.-8      	; 0x170 <main+0xaa>
+ 178:	00 c0       	rjmp	.+0      	; 0x17a <main+0xb4>
+ 17a:	00 00       	nop
+ 17c:	b1 cf       	rjmp	.-158    	; 0xe0 <main+0x1a>
+ 17e:	2f ef       	ldi	r18, 0xFF	; 255
+ 180:	89 e6       	ldi	r24, 0x69	; 105
+ 182:	98 e1       	ldi	r25, 0x18	; 24
+ 184:	21 50       	subi	r18, 0x01	; 1
+ 186:	80 40       	sbci	r24, 0x00	; 0
+ 188:	90 40       	sbci	r25, 0x00	; 0
+ 18a:	e1 f7       	brne	.-8      	; 0x184 <main+0xbe>
+ 18c:	00 c0       	rjmp	.+0      	; 0x18e <main+0xc8>
+ 18e:	00 00       	nop
+ 190:	a7 cf       	rjmp	.-178    	; 0xe0 <main+0x1a>
+
+00000192 <_exit>:
+ 192:	f8 94       	cli
+
+00000194 <__stop_program>:
+ 194:	ff cf       	rjmp	.-2      	; 0x194 <__stop_program>

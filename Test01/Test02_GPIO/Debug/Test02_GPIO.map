@@ -7,12 +7,18 @@ Discarded input sections
 
  .data          0x00000000        0x0 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega128a/avr51/crtatmega128a.o
  .bss           0x00000000        0x0 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega128a/avr51/crtatmega128a.o
- .text          0x00000000        0x0 main.o
- .data          0x00000000        0x0 main.o
- .bss           0x00000000        0x0 main.o
- .debug_line    0x00000000        0x0 main.o
- .debug_str     0x00000000       0xf9 main.o
- .comment       0x00000000       0x31 main.o
+ .text          0x00000000        0x0 MyLib.o
+ .data          0x00000000        0x0 MyLib.o
+ .bss           0x00000000        0x0 MyLib.o
+ .debug_line    0x00000000        0x0 MyLib.o
+ .debug_str     0x00000000       0xff MyLib.o
+ .comment       0x00000000       0x31 MyLib.o
+ .text          0x00000000        0x0 GPIO_main.o
+ .data          0x00000000        0x0 GPIO_main.o
+ .bss           0x00000000        0x0 GPIO_main.o
+ .debug_line    0x00000000        0x0 GPIO_main.o
+ .debug_str     0x00000000      0x103 GPIO_main.o
+ .comment       0x00000000       0x31 GPIO_main.o
  .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr51\libgcc.a(_exit.o)
  .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr51\libgcc.a(_exit.o)
  .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr51\libgcc.a(_exit.o)
@@ -46,7 +52,8 @@ Linker script and memory map
 
 Address of section .data set to 0x800100
 LOAD C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.7.374/gcc/dev/atmega128a/avr51/crtatmega128a.o
-LOAD main.o
+LOAD MyLib.o
+LOAD GPIO_main.o
 START GROUP
 LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr51\libm.a
 END GROUP
@@ -414,5 +421,5 @@ END GROUP
 
 .debug_macro
  *(.debug_macro)
-OUTPUT(Test01.elf elf32-avr)
+OUTPUT(Test02_GPIO.elf elf32-avr)
 LOAD linker stubs
